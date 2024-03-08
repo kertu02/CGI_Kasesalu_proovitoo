@@ -1,0 +1,41 @@
+.movies-container {
+    background-color: #1f1f1f;
+    color: #7b2424;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.movies-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.movies-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.movies-table th,
+.movies-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #333333;
+}
+
+.movies-table th {
+    text-align: left;
+    font-weight: bold;
+}
+
+.movies-table tbody tr:nth-child(even) {
+    background-color: #333333;
+}
+
+.movies-table tbody tr:hover {
+    background-color: #444444;
+}
+
+.movies-table td {
+    font-size: 16px;
+}
