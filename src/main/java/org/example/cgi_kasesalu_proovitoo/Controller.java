@@ -19,6 +19,7 @@ public class Controller {
     @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/movies")
     public List<Movie> getMovies() {
-        return movieRepository.findAll();
+        return movieRepository.findAllByOrderByStartTimeAsc();
     }
+
 }

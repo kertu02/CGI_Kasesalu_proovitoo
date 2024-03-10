@@ -5,6 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.time.LocalDateTime;
+
 @Entity
 public class Movie {
 
@@ -15,15 +17,19 @@ public class Movie {
     private String title;
     private String genre;
     private int ageRating;
+    private LocalDateTime startTime;
+    private String language;
 
     // Constructors
     public Movie() {
     }
 
-    public Movie(String title, String genre, int ageRating) {
+    public Movie(String title, String genre, int ageRating, LocalDateTime startTime, String language) {
         this.title = title;
         this.genre = genre;
         this.ageRating = ageRating;
+        this.startTime = startTime;
+        this.language = language;
     }
 
     // Getters and setters
@@ -59,4 +65,19 @@ public class Movie {
         this.ageRating = ageRating;
     }
 
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
 }

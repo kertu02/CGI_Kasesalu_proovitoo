@@ -1,14 +1,26 @@
+.movies-title {
+    color: #7b2424;
+    font-size: 35px;
+    margin-top: 20px;
+    margin-left: 20px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.day-header {
+    color: #7b2424;
+    font-size: 24px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
 .movies-container {
     background-color: #1f1f1f;
     color: #7b2424;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.movies-title {
-    font-size: 24px;
-    margin-bottom: 20px;
+    box-shadow: 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .movies-table {
@@ -29,7 +41,7 @@
 }
 
 .movies-table tbody tr:nth-child(even) {
-    background-color: #333333;
+    background-color: #282828;
 }
 
 .movies-table tbody tr:hover {
@@ -38,4 +50,119 @@
 
 .movies-table td {
     font-size: 16px;
+}
+
+.day-selector {
+    margin-bottom: 20px;
+}
+
+.day-selector button {
+    background-color: #1f1f1f;
+    color: #7b2424;
+    border: none;
+    padding: 10px 20px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.day-selector button:hover {
+    background-color: #282828;
+}
+
+.filter-button {
+    background-color: #1f1f1f;
+    color: #525252;
+    border: none;
+    padding: 10px 20px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.filter-button:hover {
+    background-color: #7b2424;
+    color: #2a2a2a;
+    transform: scale(1.05);
+}
+
+.filter-modal {
+    background-color: #7b2424;
+    color: #1f1f1f;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    width: auto;
+}
+
+.filter-modal td > label {
+    font-weight: bold;
+}
+.filter-modal label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-align: left;
+
+}
+
+.filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+}
+
+.filter-modal input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.filter-modal input[type="checkbox"] {
+    display: none;
+}
+
+.filter-modal input[type="checkbox"] + label {
+    position: relative;
+    padding-left: 25px;
+    cursor: pointer;
+}
+
+.filter-modal input[type="checkbox"] + label:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    border: 2px solid #1f1f1f;
+    border-radius: 3px;
+}
+
+.filter-modal input[type="checkbox"]:checked + label:before {
+    background-color: #7b2424;
+}
+
+.filter-modal input[type="checkbox"] + label:after {
+    content: '\2713';
+    position: absolute;
+    top: 1px;
+    left: 4px;
+    font-size: 14px;
+    color: #1f1f1f;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.filter-modal input[type="checkbox"]:checked + label:after {
+    opacity: 1;
 }
