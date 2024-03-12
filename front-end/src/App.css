@@ -1,7 +1,7 @@
 /* App.css */
 .App {
   text-align: center;
-  background-color: #1f1f1f; /* Dark background color */
+  background-color: #3F2E3E;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -9,7 +9,7 @@
   padding: 40px 40px;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: #ffffff; /* White text color */
+  color: #EFE1D1;
 }
 
 .App-header {
@@ -20,43 +20,23 @@
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.Movies-container {
-  background-color: #1f1f1f;
-  color: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.Movies-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-.Movies-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.Movies-table th,
-.Movies-table td {
-  padding: 10px;
-  border-bottom: 1px solid #333333;
-}
-
-.Movies-table th {
-  text-align: left;
-  font-weight: bold;
-}
-
-.Movies-table tbody tr:nth-child(even) {
-  background-color: #333333;
-}
-
-.Movies-table tbody tr:hover {
-  background-color: #444444;
-}
-
-.Movies-table td {
+button {
+  background-color: #3F2E3E;
+  color: #EFE1D1;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 20px;
   font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+  background-color: #A78295;
+}
+
+button:focus {
+  outline: none;
 }

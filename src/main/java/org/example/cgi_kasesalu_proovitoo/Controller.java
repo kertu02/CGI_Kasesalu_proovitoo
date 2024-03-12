@@ -10,16 +10,24 @@ import java.util.List;
 public class Controller {
 
     private final MovieRepository movieRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public Controller(MovieRepository movieRepository) {
+    public Controller(MovieRepository movieRepository, UserRepository userRepository) {
         this.movieRepository = movieRepository;
+        this.userRepository = userRepository;
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/movies")
     public List<Movie> getMovies() {
         return movieRepository.findAllByOrderByStartTimeAsc();
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/users")
+    public List<User> getUsers() {
+        return userRepository.findAll();
     }
 
 }
