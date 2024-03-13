@@ -223,10 +223,15 @@ const Movies = ({ movies }) => {
                             {day.movies.map(movie => (
                                 <tr key={movie.id}>
                                     <td>
-                                        <Link to={`/movie/${movie.id}`}>{movie.title}</Link>
+                                        <Link to={`/movie/${movie.id}`} className="link-style">{movie.title}</Link>
                                     </td>
                                     <td>{movie.genre}</td>
-                                    <td>{movie.ageRating}</td>
+                                    <td>
+                                        {movie.ageRating === 0 && 'Vanusepiirang puudub'}
+                                        {movie.ageRating === 12 && 'K-12'}
+                                        {movie.ageRating === 16 && 'K-16'}
+                                        {movie.ageRating === 18 && 'K-18'}
+                                    </td>
                                     <td>{formatStartTime(movie.startTime)}</td>
                                     <td>{movie.language}</td>
                                 </tr>

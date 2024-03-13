@@ -146,3 +146,8 @@
 .filter-modal input[type="checkbox"]:checked + label:after {
     opacity: 1;
 }
+
+.link-style {
+    text-decoration: none;
+    color: #EFE1D1;
+}

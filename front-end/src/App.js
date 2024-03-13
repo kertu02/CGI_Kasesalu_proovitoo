@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
+import { Routes, Route, BrowserRouter, useNavigate } from 'react-router-dom';
 import Movies from './Movies';
 import MoviesBooking from './MoviesBooking';
 import './App.css';
+import UserSelect from "./UserSelect";
 
 function App() {
     const [movies, setMovies] = useState([]);
     const [users, setUsers] = useState([]);
     const [selectedUsername, setSelectedUsername] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchMovies();
@@ -34,62 +36,31 @@ function App() {
         }
     };
 
-    function handleUsernameSelect(username) {//TODO: fix the navigating issues
-        // Set the selected username to state
+    function handleUsernameSelect(username) {
         setSelectedUsername(username);
         // Automatically navigate to "/movies" after a username is clicked
-        return (<Router>
-            <Routes>
-            <Route
-                path="/movies"
-                element={
-                    <Movies
-                        username={selectedUsername}
-                        movies={movies}
-                    />
-                }
-            /></Routes>
-        </Router>)
+        navigate('/movies');
     }
 
     return (
-        <Router>
-            <div className="App">
-                <Routes>
-                    <Route
-                        path="/"
-                        element={
-                            <header className="App-header">
-                                <h2>Vali enda kasutaja:</h2>
-                                <div>
-                                    {users.map((user) => {
-                                        return (
-                                            <button key={user.id} onClick={() => handleUsernameSelect(user.username)}>
-                                                {user.username}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </header>
-                        }
-                    />
-                    <Route
-                        path="/movies"
-                        element={
-                            <Movies
-                                username={selectedUsername}
-                                movies={movies}
-                            />
-                        }
-                    />
-                    <Route
-                        path="/movie/:id"
-                        element={<MoviesBooking />}
-                    />
-                </Routes>
-            </div>
-        </Router>
+        <div className="App">
+            <Routes>
+                <Route path="/" element={<UserSelect users={users} handleUsernameSelect={handleUsernameSelect} />}/>
+                <Route path="/movies" element={<Movies username={selectedUsername} movies={movies} />} />
+                <Route path="/movie/:id" element={<MoviesBooking />} />
+            </Routes>
+        </div>
     );
 }
 
-export default App;
+function Main() {
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="*" element={<App />} />
+            </Routes>
+        </BrowserRouter>
+    );
+}
+
+export default Main;

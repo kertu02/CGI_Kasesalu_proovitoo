@@ -1,11 +1,11 @@
 package org.example.cgi_kasesalu_proovitoo;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 @Entity
 public class Movie {
@@ -14,11 +14,18 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Seat> seats = new ArrayList<>();
+
     private String title;
     private String genre;
     private int ageRating;
     private LocalDateTime startTime;
     private String language;
+
+    public void bookSeats(Seat seat) {
+        seats.add(seat);
+    }
 
     // Constructors
     public Movie() {
@@ -30,6 +37,22 @@ public class Movie {
         this.ageRating = ageRating;
         this.startTime = startTime;
         this.language = language;
+        generateSeats();
+    }
+
+    //randomly generated default seating situation
+    private void generateSeats() {
+        int totalRows = 5;
+        int totalColumns = 5;
+        Random random = new Random();
+
+        for (int row = 1; row <= totalRows; row++) {
+            for (int column = 1; column <= totalColumns; column++) {
+                boolean isAvailable = random.nextBoolean();
+                Seat seat = new Seat(isAvailable, row, column);
+                seats.add(seat);
+            }
+        }
     }
 
     // Getters and setters
@@ -79,5 +102,13 @@ public class Movie {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public List<Seat> getSeats() {
+        return seats;
+    }
+
+    public void setSeats(List<Seat> seats) {
+        this.seats = seats;
     }
 }
