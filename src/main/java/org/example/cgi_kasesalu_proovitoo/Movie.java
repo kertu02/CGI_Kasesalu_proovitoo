@@ -23,8 +23,15 @@ public class Movie {
     private LocalDateTime startTime;
     private String language;
 
-    public void bookSeats(Seat seat) {
-        seats.add(seat);
+    public void bookSeats(List<Seat> selectedSeats) {
+        for (Seat selectedSeat : selectedSeats) {
+            for (Seat seat : seats) {
+                if (seat.getRowNr() == selectedSeat.getRowNr() && seat.getColumnNr() == selectedSeat.getColumnNr()) {
+                    seat.setAvailability(false); //mark the seat as unavailable
+                    break;
+                }
+            }
+        }
     }
 
     // Constructors
@@ -42,10 +49,10 @@ public class Movie {
 
     //randomly generated default seating situation
     private void generateSeats() {
-        int totalRows = 5;
-        int totalColumns = 5;
-        Random random = new Random();
+        int totalRows = 5;//these could be randomized as well if we want random room sizes, but for now it is always 10x5 for simplicity
+        int totalColumns = 10;
 
+        Random random = new Random();
         for (int row = 1; row <= totalRows; row++) {
             for (int column = 1; column <= totalColumns; column++) {
                 boolean isAvailable = random.nextBoolean();
@@ -55,7 +62,6 @@ public class Movie {
         }
     }
 
-    // Getters and setters
     public Long getId() {
         return id;
     }

@@ -5,11 +5,13 @@ import Movies from './Movies';
 import MoviesBooking from './MoviesBooking';
 import './App.css';
 import UserSelect from "./UserSelect";
+import UserPage from "./UserPage";
 
 function App() {
     const [movies, setMovies] = useState([]);
     const [users, setUsers] = useState([]);
     const [selectedUsername, setSelectedUsername] = useState(null);
+    const [selectedMovie, setSelectedMovie] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -38,16 +40,21 @@ function App() {
 
     function handleUsernameSelect(username) {
         setSelectedUsername(username);
-        // Automatically navigate to "/movies" after a username is clicked
         navigate('/movies');
+    }
+
+    function handleMovieSelect(movieId) {
+        const selected = movies.find(movie => movie.id === movieId);
+        setSelectedMovie(selected);
     }
 
     return (
         <div className="App">
             <Routes>
                 <Route path="/" element={<UserSelect users={users} handleUsernameSelect={handleUsernameSelect} />}/>
-                <Route path="/movies" element={<Movies username={selectedUsername} movies={movies} />} />
-                <Route path="/movie/:id" element={<MoviesBooking />} />
+                <Route path="/users/:username" element={<UserPage users={users} username={selectedUsername} navigate={navigate} />}/>
+                <Route path="/movies" element={<Movies username={selectedUsername} movies={movies} onSelectMovie={handleMovieSelect} navigate={navigate}  />} />
+                <Route path="/movie/:id" element={<MoviesBooking movie={selectedMovie} username={selectedUsername} navigate={navigate} />} />
             </Routes>
         </div>
     );

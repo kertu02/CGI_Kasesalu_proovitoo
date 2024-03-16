@@ -83,6 +83,7 @@
 .filter-modal td > label {
     font-weight: bold;
 }
+
 .filter-modal label {
     display: block;
     margin-bottom: 8px;
@@ -151,3 +152,64 @@
     text-decoration: none;
     color: #EFE1D1;
 }
+
+.unavailable-seat {
+    opacity: 0.5;
+}
+
+.movies-seats {
+    padding-left: 27px;
+    display: grid;
+    grid-template-columns: repeat(10, 40px);
+    gap: 5px;
+    padding-bottom: 30px;
+}
+
+.movie-seat {
+    width: 40px;
+    height: 40px;
+    background-color: #A78295;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.movie-seat.available {
+    background-color: #EFE1D1;
+}
+
+input[type="number"] {
+    width: 60px;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #331D2C;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #EFE1D1;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #331D2C;
+}
+
+.custom-hr {
+    position: relative;
+    width: 350px;
+    height: 20px;
+    margin: 10px auto;
+    background-color: #A78295;
+    border-radius: 15px;
+}
+
+.label-screen {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #331D2C;
+    padding: 0 10px;
+    font-size: 10px;
+}
+

@@ -2,25 +2,21 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
 import './Movies.css';
 
-const Movies = ({ movies }) => {
-
-    // State variables for filters
+const Movies = ({ movies, onSelectMovie, navigate, username}) => {
     const [selectedGenres, setSelectedGenres] = useState([]);
     const [selectedStartTimes, setSelectedStartTimes] = useState([]);
     const [selectedAgeRatings, setSelectedAgeRatings] = useState([]);
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
+    const [filteredMovies, setFilteredMovies] = useState([]);
 
-    // Function to toggle the visibility of filters
     const toggleFilters = () => {
         setShowFilters(prevState => !prevState);
     };
 
-    // Function to filter movies based on selected criteria
     const filterMovies = useCallback(() => {
         let filtered = [...movies]; // Copy of movies arrays to work with
 
-        // Apply filters
         if (selectedGenres.length > 0) filtered = filtered.filter(movie => selectedGenres.includes(movie.genre));
         if (selectedStartTimes.length > 0) filtered = filtered.filter(movie => selectedStartTimes.includes(new Date(movie.startTime).getHours().toString()));
         if (selectedAgeRatings.length > 0) filtered = filtered.filter(movie => selectedAgeRatings.includes(movie.ageRating.toString()));
@@ -29,33 +25,11 @@ const Movies = ({ movies }) => {
         setFilteredMovies(filtered);
     }, [movies, selectedGenres, selectedStartTimes, selectedAgeRatings, selectedLanguages]);
 
-    // State variable for filtered movies
-    const [filteredMovies, setFilteredMovies] = useState([]);
 
-    // Apply filters whenever any filter changes
     useEffect(() => {
         filterMovies();
     }, [filterMovies]);
 
-    // Event handlers for filter options
-    const handleGenreChange = event => {
-        const { value, checked } = event.target;
-        setSelectedGenres(prevGenres => checked ? [...prevGenres, value] : prevGenres.filter(genre => genre !== value));
-    };
-    const handleStartTimeChange = event => {
-        const { value, checked } = event.target;
-        setSelectedStartTimes(prevStartTimes => checked ? [...prevStartTimes, value] : prevStartTimes.filter(startTime => startTime !== value));
-    };
-    const handleAgeRatingChange = event => {
-        const { value, checked } = event.target;
-        setSelectedAgeRatings(prevAgeRatings => checked ? [...prevAgeRatings, value] : prevAgeRatings.filter(ageRating => ageRating !== value));
-    };
-    const handleLanguageChange = event => {
-        const { value, checked } = event.target;
-        setSelectedLanguages(prevLanguages => checked ? [...prevLanguages, value] : prevLanguages.filter(language => language !== value));
-    };
-
-    // Generate days of the week based on filtered movies
     const generateDaysOfWeek = () => {
         if (filteredMovies.length === 0) return []; // Return empty array if there are no movies
 
@@ -85,7 +59,6 @@ const Movies = ({ movies }) => {
         return daysOfWeek;
     };
 
-    // Format the start time
     const formatStartTime = startTime => {
         const date = new Date(startTime);
         const hours = date.getHours();
@@ -93,22 +66,47 @@ const Movies = ({ movies }) => {
         return `${padZero(hours)}:${padZero(minutes)}`;
     };
 
-    // Pad single digit numbers with leading zero
     const padZero = num => {
         return num < 10 ? '0' + num : num;
     };
 
-    // Format date as "Day, DD.MM"
     const formatDate = date => {
         const options = { weekday: 'long', day: '2-digit', month: '2-digit' };
         return date.toLocaleDateString('et-EE', options);
     };
 
+    const handleGenreChange = event => {
+        const { value, checked } = event.target;
+        setSelectedGenres(prevGenres => checked ? [...prevGenres, value] : prevGenres.filter(genre => genre !== value));
+    };
+    const handleStartTimeChange = event => {
+        const { value, checked } = event.target;
+        setSelectedStartTimes(prevStartTimes => checked ? [...prevStartTimes, value] : prevStartTimes.filter(startTime => startTime !== value));
+    };
+    const handleAgeRatingChange = event => {
+        const { value, checked } = event.target;
+        setSelectedAgeRatings(prevAgeRatings => checked ? [...prevAgeRatings, value] : prevAgeRatings.filter(ageRating => ageRating !== value));
+    };
+    const handleLanguageChange = event => {
+        const { value, checked } = event.target;
+        setSelectedLanguages(prevLanguages => checked ? [...prevLanguages, value] : prevLanguages.filter(language => language !== value));
+    };
+
+    function handleNavigateToUserPage() {
+        navigate(`/users/${username}`);
+    }
+
+    function handleNavigateToHome() {
+        navigate('');
+    }
+
     return (
         <div>
             <h1 className="movies-title">KINOKAVA</h1>
+            <button className="history-button" onClick={handleNavigateToUserPage}>Minu profiil</button>
             <button className="history-button">Soovita filme vaatamisajaloo põhjal</button>
             <button className="filter-button" onClick={toggleFilters}>Filtrid</button>
+            <button className="filter-button" onClick={handleNavigateToHome}>Vaheta kasutajat</button>
             {showFilters && (
                 <div className="filter-modal">
                     <table className="filter-table">
@@ -223,7 +221,7 @@ const Movies = ({ movies }) => {
                             {day.movies.map(movie => (
                                 <tr key={movie.id}>
                                     <td>
-                                        <Link to={`/movie/${movie.id}`} className="link-style">{movie.title}</Link>
+                                        <Link to={`/movie/${movie.id}`} className="link-style" onClick={() => onSelectMovie(movie.id)}>{movie.title}</Link>
                                     </td>
                                     <td>{movie.genre}</td>
                                     <td>

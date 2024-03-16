@@ -41,7 +41,7 @@ public class MovieData implements CommandLineRunner {
         movieRepository.save(new Movie("The Willoughbys", "Komöödia", 12, LocalDateTime.parse("2024-04-01T18:25"), "ET"));
 
         Movie movie = movieRepository.getReferenceById(1L);
-        User user = userRepository.findAllByUsername("user1");
+        User user = userRepository.findByUsername("user1");
         user.addWatchedMovie(movie);
         userRepository.save(user);
     }
