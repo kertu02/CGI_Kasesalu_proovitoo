@@ -6,7 +6,7 @@ const UserSelect = ({ users, handleUsernameSelect }) => (
         <h2>Vali enda kasutaja:</h2>
         <div>
             {users.map((user) => (
-                <button key={user.id} onClick={() => handleUsernameSelect(user.username)}>
+                <button className="custom-button" key={user.id} onClick={() => handleUsernameSelect(user.username)}>
                     {user.username}
                 </button>
             ))}

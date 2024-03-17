@@ -113,10 +113,10 @@ const MoviesBooking = ({movie, username, navigate}) => {
             {!confirmationMessage &&<h1 className="movies-title">Vali istekoht:</h1>}
             {!confirmationMessage && <div className="custom-hr"><p className="label-screen">EKRAAN</p></div>}
             {!confirmationMessage && <div className="movies-seats">{renderSeats()}</div>}
-            {!confirmationMessage && <button className="filter-button" onClick={handleConfirmSeats}>Kinnita valik</button>}
+            {!confirmationMessage && <button className="custom-button" onClick={handleConfirmSeats}>Kinnita valik</button>}
             {confirmationMessage && <div className="confirmation-message">{confirmationMessage}</div>}
             {confirmationError && <div className="error-message">{confirmationError}</div>}
-            <button className="filter-button" onClick={handleReturnToMovies}>Tagasi filmide lehele</button>
+            <button className="custom-button" onClick={handleReturnToMovies}>Tagasi filmide lehele</button>
         </div>
     );
 

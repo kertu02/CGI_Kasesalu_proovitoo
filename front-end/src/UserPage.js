@@ -54,7 +54,7 @@ const UserPage = ({ users, username, navigate }) => {
                     </table>
                 )}
             </div>
-            <button className="back-button" onClick={handleReturnToMovies}>Tagasi filmide lehele</button>
+            <button className="custom-button" onClick={handleReturnToMovies}>Tagasi filmide lehele</button>
         </div>
     );
 };

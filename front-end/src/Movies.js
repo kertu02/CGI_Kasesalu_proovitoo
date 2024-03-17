@@ -2,20 +2,21 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from "react-router-dom";
 import './Movies.css';
 
-const Movies = ({ movies, onSelectMovie, navigate, username}) => {
+const Movies = ({ movies, onSelectMovie, navigate, username, users}) => {
     const [selectedGenres, setSelectedGenres] = useState([]);
     const [selectedStartTimes, setSelectedStartTimes] = useState([]);
     const [selectedAgeRatings, setSelectedAgeRatings] = useState([]);
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
     const [filteredMovies, setFilteredMovies] = useState([]);
+    const currentUser = users.find(user => user.username === username);
 
     const toggleFilters = () => {
         setShowFilters(prevState => !prevState);
     };
 
     const filterMovies = useCallback(() => {
-        let filtered = [...movies]; // Copy of movies arrays to work with
+        let filtered = [...movies]; //copy of movies arrays to work with
 
         if (selectedGenres.length > 0) filtered = filtered.filter(movie => selectedGenres.includes(movie.genre));
         if (selectedStartTimes.length > 0) filtered = filtered.filter(movie => selectedStartTimes.includes(new Date(movie.startTime).getHours().toString()));
@@ -31,28 +32,28 @@ const Movies = ({ movies, onSelectMovie, navigate, username}) => {
     }, [filterMovies]);
 
     const generateDaysOfWeek = () => {
-        if (filteredMovies.length === 0) return []; // Return empty array if there are no movies
+        if (filteredMovies.length === 0) return [];
 
         const daysOfWeek = [];
 
-        // Find the earliest start time from the filtered movie data
+        //find the earliest start time from the filtered movie data
         const earliestStartTime = new Date(Math.min(...filteredMovies.map(movie => new Date(movie.startTime).getTime())));
-        const today = new Date(earliestStartTime); // Get the earliest start time
+        const today = new Date(earliestStartTime); //get the earliest start time
 
         for (let i = 0; i < 4; i++) {
             const date = new Date(today);
             date.setDate(date.getDate() + i);
             const formattedDate = formatDate(date);
-            const label = formattedDate.split(', ')[0]; // Extract the weekday
-            const dayDate = formattedDate.substring(formattedDate.indexOf(',') + 2); // Extract the day and month
+            const label = formattedDate.split(', ')[0]; //extract the weekday
+            const dayDate = formattedDate.substring(formattedDate.indexOf(',') + 2); //extract the day and month
 
-            // Find movies for this day from filteredMovies
+            //find movies for this day from filteredMovies
             const dayMovies = filteredMovies.filter(movie => {
                 const movieDate = formatDate(new Date(movie.startTime));
                 return movieDate === formattedDate;
             });
 
-            // Only add the day if there are movies for that day
+            //only add the day if there are movies for that day
             if (dayMovies.length > 0)
                 daysOfWeek.push({ label, date: dayDate, movies: dayMovies });
         }
@@ -100,13 +101,43 @@ const Movies = ({ movies, onSelectMovie, navigate, username}) => {
         navigate('');
     }
 
+    function handleSuggestByMostWatchedGenre() {
+        console.log(currentUser.watchedMovies);
+        const genresCount = {};
+        currentUser.watchedMovies.forEach(movie => {
+            genresCount[movie.genre] = (genresCount[movie.genre] || 0) + 1;
+        });
+
+        let mostWatchedGenre = null;
+        let maxCount = 0;
+        Object.keys(genresCount).forEach(genre => {
+            if (genresCount[genre] > maxCount) {
+                mostWatchedGenre = genre;
+                maxCount = genresCount[genre];
+            }
+        });
+
+        if (mostWatchedGenre != null) {
+            const filtered = movies.filter(movie => movie.genre === mostWatchedGenre);
+            setFilteredMovies(filtered);
+        } else window.alert("Sa pole veel ühtegi filmi vaadanud.");
+    }
+
+
+    function handleRemovingFilters() {
+        setSelectedGenres([]);
+        setSelectedStartTimes([]);
+        setSelectedAgeRatings([]);
+        setSelectedLanguages([]);
+        setFilteredMovies(movies);
+    }
+
     return (
         <div>
             <h1 className="movies-title">KINOKAVA</h1>
-            <button className="history-button" onClick={handleNavigateToUserPage}>Minu profiil</button>
-            <button className="history-button">Soovita filme vaatamisajaloo põhjal</button>
-            <button className="filter-button" onClick={toggleFilters}>Filtrid</button>
-            <button className="filter-button" onClick={handleNavigateToHome}>Vaheta kasutajat</button>
+            <button className="custom-button" onClick={handleNavigateToUserPage}>Minu profiil</button>
+            <button className="custom-button" onClick={toggleFilters}>Filtrid</button>
+            <button className="custom-button" onClick={handleNavigateToHome}>Vaheta kasutajat</button>
             {showFilters && (
                 <div className="filter-modal">
                     <table className="filter-table">
@@ -116,7 +147,8 @@ const Movies = ({ movies, onSelectMovie, navigate, username}) => {
                             <td>
                                 <div className="filter-options">
                                     <input type="checkbox" id="documentary" name="genre" value="Dokumentaal"
-                                           checked={selectedGenres.includes("Dokumentaal")} onChange={handleGenreChange}/>
+                                           checked={selectedGenres.includes("Dokumentaal")}
+                                           onChange={handleGenreChange}/>
                                     <label htmlFor="documentary">Dokumentaal</label>
                                     <input type="checkbox" id="drama" name="genre" value="Draama"
                                            checked={selectedGenres.includes("Draama")} onChange={handleGenreChange}/>
@@ -201,11 +233,15 @@ const Movies = ({ movies, onSelectMovie, navigate, username}) => {
                         </tr>
                         </tbody>
                     </table>
+                    <button className="custom-button" onClick={handleSuggestByMostWatchedGenre}>Soovita filme
+                        vaatamisajaloo põhjal
+                    </button>
+                    <button className="custom-button" onClick={handleRemovingFilters}>Eemalda filtrid</button>
                 </div>
             )}
             {generateDaysOfWeek().map((day, index) => (
                 <div key={index} className="day-container">
-                    <h2 className="day-header">{day.label}, {day.date}</h2>
+                <h2 className="day-header">{day.label}, {day.date}</h2>
                     <div className="movies-container">
                         <table className="movies-table">
                             <thead>

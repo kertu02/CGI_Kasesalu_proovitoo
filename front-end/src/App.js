@@ -53,7 +53,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<UserSelect users={users} handleUsernameSelect={handleUsernameSelect} />}/>
                 <Route path="/users/:username" element={<UserPage users={users} username={selectedUsername} navigate={navigate} />}/>
-                <Route path="/movies" element={<Movies username={selectedUsername} movies={movies} onSelectMovie={handleMovieSelect} navigate={navigate}  />} />
+                <Route path="/movies" element={<Movies username={selectedUsername} movies={movies} onSelectMovie={handleMovieSelect} navigate={navigate} users={users}  />} />
                 <Route path="/movie/:id" element={<MoviesBooking movie={selectedMovie} username={selectedUsername} navigate={navigate} />} />
             </Routes>
         </div>

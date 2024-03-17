@@ -20,23 +20,21 @@
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-button {
-  background-color: #3F2E3E;
-  color: #EFE1D1;
+.custom-button {
+  background-color: #331D2C;
+  color: #A78295;
   border: none;
   padding: 10px 20px;
-  margin: 5px;
-  border-radius: 20px;
-  font-size: 16px;
+  margin-right: 10px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-size: 16px;
+  text-transform: uppercase;
 }
 
-button:hover {
+.custom-button:hover {
   background-color: #A78295;
-}
-
-button:focus {
-  outline: none;
+  color: #331D2C;
+  transform: scale(1.05);
 }
