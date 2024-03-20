@@ -15,33 +15,37 @@ function App() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchMovies();
-        fetchUsers();
+        const fetchData = async () => {
+            try {
+                const moviesResponse = await axios.get(`http://localhost:8080/movies`);
+                setMovies(moviesResponse.data);
+
+                const usersResponse = await axios.get(`http://localhost:8080/users`);
+                setUsers(usersResponse.data);
+
+                const storedUsername = localStorage.getItem('selectedUsername');
+                if (storedUsername) {
+                    setSelectedUsername(storedUsername);
+                }
+
+                if (storedUsername) {
+                    const userResponse = await axios.get(`http://localhost:8080/users/${storedUsername}`);
+                    setUsers(prevUsers => prevUsers.map(user => user.username === storedUsername ? userResponse.data : user));
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
     }, []);
-
-    const fetchMovies = async () => {
-        try {
-            const response = await axios.get(`http://localhost:8080/movies`);
-            setMovies(response.data);
-        } catch (error) {
-            console.error('Error fetching movies:', error);
-        }
-    };
-
-    const fetchUsers = async () => {
-        try {
-            const response = await axios.get(`http://localhost:8080/users`);
-            setUsers(response.data);
-            console.log('Fetched Users:', response.data);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    };
 
     function handleUsernameSelect(username) {
         setSelectedUsername(username);
+        localStorage.setItem('selectedUsername', username);
         navigate('/movies');
     }
+
 
     function handleMovieSelect(movieId) {
         const selected = movies.find(movie => movie.id === movieId);

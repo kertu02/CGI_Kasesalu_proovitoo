@@ -1,35 +1,77 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
 import { Link } from "react-router-dom";
 import './Movies.css';
 
-const Movies = ({ movies, onSelectMovie, navigate, username, users}) => {
+const Movies = ({ onSelectMovie, navigate, username }) => {
     const [selectedGenres, setSelectedGenres] = useState([]);
     const [selectedStartTimes, setSelectedStartTimes] = useState([]);
     const [selectedAgeRatings, setSelectedAgeRatings] = useState([]);
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
     const [filteredMovies, setFilteredMovies] = useState([]);
-    const currentUser = users.find(user => user.username === username);
+    const [showPercentageColumn, setShowPercentageColumn] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [movies, setMovies] = useState(null);
+    const [isSuggestButtonPressed, setIsSuggestButtonPressed] = useState(false);
 
     const toggleFilters = () => {
         setShowFilters(prevState => !prevState);
     };
 
-    const filterMovies = useCallback(() => {
-        let filtered = [...movies]; //copy of movies arrays to work with
+    const toggleSuggestButton = () => {
+        setIsSuggestButtonPressed(prevState => !prevState);
+    };
 
-        if (selectedGenres.length > 0) filtered = filtered.filter(movie => selectedGenres.includes(movie.genre));
-        if (selectedStartTimes.length > 0) filtered = filtered.filter(movie => selectedStartTimes.includes(new Date(movie.startTime).getHours().toString()));
-        if (selectedAgeRatings.length > 0) filtered = filtered.filter(movie => selectedAgeRatings.includes(movie.ageRating.toString()));
-        if (selectedLanguages.length > 0) filtered = filtered.filter(movie => selectedLanguages.includes(movie.language));
+    const filterMovies = useCallback(() => {
+        if (!movies) return; // Return if movies are not loaded yet
+
+        let filtered = [...movies]; // Make a copy of movies array to work with
+
+        if (selectedGenres.length > 0)
+            filtered = filtered.filter(movie => selectedGenres.includes(movie.genre));
+        if (selectedStartTimes.length > 0)
+            filtered = filtered.filter(movie => selectedStartTimes.includes(new Date(movie.startTime).getHours().toString()));
+        if (selectedAgeRatings.length > 0)
+            filtered = filtered.filter(movie => selectedAgeRatings.includes(movie.ageRating.toString()));
+        if (selectedLanguages.length > 0)
+            filtered = filtered.filter(movie => selectedLanguages.includes(movie.language));
 
         setFilteredMovies(filtered);
     }, [movies, selectedGenres, selectedStartTimes, selectedAgeRatings, selectedLanguages]);
 
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/users/${username}`);
+                setCurrentUser(response.data);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        const fetchMovies = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/movies`);
+                setMovies(response.data);
+            } catch (error) {
+                console.error('Error fetching movies:', error);
+            }
+        };
+
+        fetchMovies();
+        fetchUserData();
+    }, [username]);
 
     useEffect(() => {
         filterMovies();
     }, [filterMovies]);
+
+    useEffect(() => {
+        // When movies or filters change, re-filter movies
+        filterMovies();
+    }, [movies, filterMovies]);
+
 
     const generateDaysOfWeek = () => {
         if (filteredMovies.length === 0) return [];
@@ -79,22 +121,33 @@ const Movies = ({ movies, onSelectMovie, navigate, username, users}) => {
     const handleGenreChange = event => {
         const { value, checked } = event.target;
         setSelectedGenres(prevGenres => checked ? [...prevGenres, value] : prevGenres.filter(genre => genre !== value));
+        setIsSuggestButtonPressed(false); // Reset suggest button state
+        setShowPercentageColumn(false); // Hide percentage column
     };
+
     const handleStartTimeChange = event => {
         const { value, checked } = event.target;
         setSelectedStartTimes(prevStartTimes => checked ? [...prevStartTimes, value] : prevStartTimes.filter(startTime => startTime !== value));
+        setIsSuggestButtonPressed(false); // Reset suggest button state
+        setShowPercentageColumn(false); // Hide percentage column
     };
+
     const handleAgeRatingChange = event => {
         const { value, checked } = event.target;
         setSelectedAgeRatings(prevAgeRatings => checked ? [...prevAgeRatings, value] : prevAgeRatings.filter(ageRating => ageRating !== value));
+        setIsSuggestButtonPressed(false); // Reset suggest button state
+        setShowPercentageColumn(false); // Hide percentage column
     };
+
     const handleLanguageChange = event => {
         const { value, checked } = event.target;
         setSelectedLanguages(prevLanguages => checked ? [...prevLanguages, value] : prevLanguages.filter(language => language !== value));
+        setIsSuggestButtonPressed(false); // Reset suggest button state
+        setShowPercentageColumn(false); // Hide percentage column
     };
 
     function handleNavigateToUserPage() {
-        navigate(`/users/${username}`);
+        navigate(`/users/${currentUser.username}`);
     }
 
     function handleNavigateToHome() {
@@ -102,27 +155,50 @@ const Movies = ({ movies, onSelectMovie, navigate, username, users}) => {
     }
 
     function handleSuggestByMostWatchedGenre() {
-        console.log(currentUser.watchedMovies);
-        const genresCount = {};
-        currentUser.watchedMovies.forEach(movie => {
-            genresCount[movie.genre] = (genresCount[movie.genre] || 0) + 1;
-        });
+        if (currentUser.watchedMovies.length === 0) {
+            window.alert("Sa pole veel ühtegi filmi vaadanud.");
+            return;
+        }
 
-        let mostWatchedGenre = null;
-        let maxCount = 0;
-        Object.keys(genresCount).forEach(genre => {
-            if (genresCount[genre] > maxCount) {
-                mostWatchedGenre = genre;
-                maxCount = genresCount[genre];
-            }
-        });
+        if (isSuggestButtonPressed) {
+            toggleSuggestButton();
+            handleRemovingFilters();
+            return;
+        }
 
-        if (mostWatchedGenre != null) {
-            const filtered = movies.filter(movie => movie.genre === mostWatchedGenre);
-            setFilteredMovies(filtered);
-        } else window.alert("Sa pole veel ühtegi filmi vaadanud.");
+        // Check if there are active filters
+        const filtersActive = selectedGenres.length > 0 || selectedStartTimes.length > 0 || selectedAgeRatings.length > 0 || selectedLanguages.length > 0;
+
+        let isCleaned = false;
+        // If there are active filters, clear them first
+        if (filtersActive) {
+            isCleaned = true;
+            handleRemovingFilters();
+        }
+
+        // Calculate the suggestion mode only if there are no active filters
+        if (!filtersActive || isCleaned) {
+            // Calculate percentage of each genre among the user's watched movies
+            const genresCount = {};
+            currentUser.watchedMovies.forEach(movie => {
+                genresCount[movie.genre] = (genresCount[movie.genre] || 0) + 1;
+            });
+
+            const totalWatchedMovies = currentUser.watchedMovies.length;
+            const suggestedMovies = movies.filter(movie => currentUser.watchedMovies.some(watchedMovie => watchedMovie.genre === movie.genre));
+
+            // Add percentage column to each movie
+            const moviesWithPercentage = suggestedMovies.map(movie => ({
+                ...movie,
+                percentage: ((genresCount[movie.genre] || 0) / totalWatchedMovies * 100).toFixed(0) + '%'
+            }));
+
+            // Set filtered movies to suggested movies
+            setFilteredMovies(moviesWithPercentage);
+            setShowPercentageColumn(true);
+            setIsSuggestButtonPressed(true);
+        }
     }
-
 
     function handleRemovingFilters() {
         setSelectedGenres([]);
@@ -130,6 +206,8 @@ const Movies = ({ movies, onSelectMovie, navigate, username, users}) => {
         setSelectedAgeRatings([]);
         setSelectedLanguages([]);
         setFilteredMovies(movies);
+        setShowPercentageColumn(false);
+        setIsSuggestButtonPressed(false);
     }
 
     return (
@@ -233,15 +311,16 @@ const Movies = ({ movies, onSelectMovie, navigate, username, users}) => {
                         </tr>
                         </tbody>
                     </table>
-                    <button className="custom-button" onClick={handleSuggestByMostWatchedGenre}>Soovita filme
-                        vaatamisajaloo põhjal
+                    <button className={`custom-button ${isSuggestButtonPressed ? 'clicked' : ''}`}
+                            onClick={handleSuggestByMostWatchedGenre}>
+                        Soovita filme vaatamisajaloo põhjal
                     </button>
                     <button className="custom-button" onClick={handleRemovingFilters}>Eemalda filtrid</button>
                 </div>
             )}
             {generateDaysOfWeek().map((day, index) => (
                 <div key={index} className="day-container">
-                <h2 className="day-header">{day.label}, {day.date}</h2>
+                    <h2 className="day-header">{day.label}, {day.date}</h2>
                     <div className="movies-container">
                         <table className="movies-table">
                             <thead>
@@ -251,6 +330,7 @@ const Movies = ({ movies, onSelectMovie, navigate, username, users}) => {
                                 <th>Vanusepiirang</th>
                                 <th>Algus</th>
                                 <th>Keel</th>
+                                {showPercentageColumn && <th>Sobivuse %</th>}
                             </tr>
                             </thead>
                             <tbody>
@@ -268,6 +348,7 @@ const Movies = ({ movies, onSelectMovie, navigate, username, users}) => {
                                     </td>
                                     <td>{formatStartTime(movie.startTime)}</td>
                                     <td>{movie.language}</td>
+                                    {showPercentageColumn && <td>{movie.percentage}</td>}
                                 </tr>
                             ))}
                             </tbody>

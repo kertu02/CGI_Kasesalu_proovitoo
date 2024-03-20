@@ -38,3 +38,16 @@
   color: #331D2C;
   transform: scale(1.05);
 }
+
+.error-message, .confirmation-message {
+  padding-bottom: 20px;
+}
+
+.clicked {
+  background-color: #EFE1D1;
+  color: #331D2C;
+}
+
+.custom-button.clicked:hover {
+  background-color: #EFE1D1;
+}

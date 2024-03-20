@@ -42,6 +42,17 @@ public class Controller {
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/movies/{id}")
+    public ResponseEntity<Movie> getMovie(@PathVariable Long id) {
+        Movie movie = movieRepository.findMovieById(id);
+        if (movie != null) {
+            return ResponseEntity.ok(movie);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping("/movies/{id}")
     public ResponseEntity<Movie> updateMovie(@PathVariable Long id, @RequestBody Movie updatedMovie) {
         return movieRepository.findById(id)

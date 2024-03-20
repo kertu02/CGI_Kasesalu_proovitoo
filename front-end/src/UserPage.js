@@ -1,8 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './UserPage.css';
 
-const UserPage = ({ users, username, navigate }) => {
-    const currentUser = users.find(user => user.username === username);
+const UserPage = ({ username, navigate }) => {
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/users/${username}`);
+                setCurrentUser(response.data);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        fetchUserData();
+    }, [username]);
 
     if (!currentUser) {
         return <div className="user-not-found">User not found</div>;

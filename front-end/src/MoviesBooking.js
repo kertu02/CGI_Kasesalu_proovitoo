@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 
 const MoviesBooking = ({movie, username, navigate}) => {
@@ -22,36 +22,28 @@ const MoviesBooking = ({movie, username, navigate}) => {
     useEffect(() => {
         if (!seatsBooked) {
             const availableSeats = movie.seats.filter(seat => seat.availability);
+            const maxRow = Math.max(...availableSeats.map(seat => seat.rowNr));
+            const maxColumn = Math.max(...availableSeats.map(seat => seat.columnNr));
+            const centerRow = Math.ceil(maxRow / 2);
+            const centerColumn = Math.ceil(maxColumn / 2);
 
-            // Calculate center row and column
-            const centerRow = Math.ceil(movie.rows / 2);
-            const centerColumn = Math.ceil(movie.columns / 2);
-
-            // Function to find the nearest available seats to the center
+            //function to find the nearest available seats to the center
             const findNearestSeatsToCenter = (seats, centerRow, centerColumn, numberOfSeats) => {
-                const nearestSeats = [];
-                seats.forEach(seat => {
-                    // Calculate distance from the center for each seat
-                    const distance = Math.abs(seat.rowNr - centerRow) + Math.abs(seat.columnNr - centerColumn);
-                    nearestSeats.push({seat, distance});
+                const availableSeats = seats.filter(seat => seat.availability);
+
+                //sort available seats based on their distance from the center
+                const sortedSeats = availableSeats.sort((a, b) => {
+                    const distanceA = Math.abs(a.rowNr - centerRow) + Math.abs(a.columnNr - centerColumn);
+                    const distanceB = Math.abs(b.rowNr - centerRow) + Math.abs(b.columnNr - centerColumn);
+                    return distanceA - distanceB;
                 });
 
-                // Sort seats based on their distance from the center
-                nearestSeats.sort((a, b) => a.distance - b.distance);
-
-                // Select the nearest available seats
-                const selectedSeats = [];
-                for (let i = 0; i < numberOfSeats; i++) {
-                    if (nearestSeats[i] && nearestSeats[i].seat.availability) {
-                        selectedSeats.push(nearestSeats[i].seat);
-                    } else {
-                        break;
-                    }
-                }
-
-                return selectedSeats;
+                console.log(sortedSeats);
+                //select the nearest available seats up to the required number
+                return sortedSeats.slice(0, numberOfSeats);
             };
 
+            console.log(centerRow);
             const suggestedSeats = findNearestSeatsToCenter(availableSeats, centerRow, centerColumn, ticketsSelected);
             setSelectedSeats(suggestedSeats);
         }
@@ -107,17 +99,24 @@ const MoviesBooking = ({movie, username, navigate}) => {
     };
 
     return (
-        <div>
-            {!confirmationMessage && <h1 className="movies-title">Vali pileti arv:</h1>}
-            {!confirmationMessage &&<input type="number" value={ticketsSelected} onChange={handleTicketChange}/>}
-            {!confirmationMessage &&<h1 className="movies-title">Vali istekoht:</h1>}
-            {!confirmationMessage && <div className="custom-hr"><p className="label-screen">EKRAAN</p></div>}
-            {!confirmationMessage && <div className="movies-seats">{renderSeats()}</div>}
-            {!confirmationMessage && <button className="custom-button" onClick={handleConfirmSeats}>Kinnita valik</button>}
+        <>
+            {!confirmationMessage && (
+                <>
+                    <h1 className="movies-title">Vali pileti arv:</h1>
+                    <input type="number" value={ticketsSelected} onChange={handleTicketChange}/>
+                    <h1 className="movies-title">Vali istekoht:</h1>
+                    <div className="custom-hr">
+                        <p className="label-screen">EKRAAN</p>
+                    </div>
+                    <div className="movies-seats">{renderSeats()}</div>
+                    <button className="custom-button" onClick={handleConfirmSeats}>Kinnita valik</button>
+                    <br></br>
+                </>
+            )}
             {confirmationMessage && <div className="confirmation-message">{confirmationMessage}</div>}
             {confirmationError && <div className="error-message">{confirmationError}</div>}
             <button className="custom-button" onClick={handleReturnToMovies}>Tagasi filmide lehele</button>
-        </div>
+        </>
     );
 
 };
