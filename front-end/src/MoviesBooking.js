@@ -2,59 +2,89 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 
 const MoviesBooking = ({movie, username, navigate}) => {
-    const [selectedSeats, setSelectedSeats] = useState([]);
     const [ticketsSelected, setTicketsSelected] = useState(1);
+    const [seatSuggestions, setSeatSuggestions] = useState([]);
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [confirmationError, setConfirmationError] = useState('');
     const [seatsBooked, setSeatsBooked] = useState(false);
+    const [selectedSeats, setSelectedSeats] = useState([]);
+    const [isButtonPressed, setIsButtonPressed] = useState(false);
+    const [manualSelection, setManualSelection] = useState(false);
 
-    const handleSeatSelect = (row, column) => {
-        if (!seatsBooked) {
-            const seatIndex = selectedSeats.findIndex(seat => seat.rowNr === row && seat.columnNr === column);
-            if (seatIndex !== -1) {
-                setSelectedSeats(prevSeats => prevSeats.filter((seat, index) => index !== seatIndex));
-            } else {
-                setSelectedSeats(prevSeats => [...prevSeats, {rowNr: row, columnNr: column}]);
-            }
-        }
+    const togglePressableButton = () => {
+        setManualSelection(prevState => !prevState);
+        setIsButtonPressed(prevState => !prevState);
     };
 
     useEffect(() => {
-        if (!seatsBooked) {
-            const availableSeats = movie.seats.filter(seat => seat.availability);
-            const maxRow = Math.max(...availableSeats.map(seat => seat.rowNr));
-            const maxColumn = Math.max(...availableSeats.map(seat => seat.columnNr));
-            const centerRow = Math.ceil(maxRow / 2);
-            const centerColumn = Math.ceil(maxColumn / 2);
-
-            //function to find the nearest available seats to the center
-            const findNearestSeatsToCenter = (seats, centerRow, centerColumn, numberOfSeats) => {
-                const availableSeats = seats.filter(seat => seat.availability);
-
-                //sort available seats based on their distance from the center
-                const sortedSeats = availableSeats.sort((a, b) => {
-                    const distanceA = Math.abs(a.rowNr - centerRow) + Math.abs(a.columnNr - centerColumn);
-                    const distanceB = Math.abs(b.rowNr - centerRow) + Math.abs(b.columnNr - centerColumn);
-                    return distanceA - distanceB;
-                });
-
-                console.log(sortedSeats);
-                //select the nearest available seats up to the required number
-                return sortedSeats.slice(0, numberOfSeats);
-            };
-
-            console.log(centerRow);
-            const suggestedSeats = findNearestSeatsToCenter(availableSeats, centerRow, centerColumn, ticketsSelected);
-            setSelectedSeats(suggestedSeats);
+        if (!manualSelection) {
+            generateSeatSuggestions();
         }
-    }, [ticketsSelected, movie.rows, movie.columns, movie.seats, seatsBooked]);
+    }, [ticketsSelected, manualSelection]); //trigger only when ticketsSelected or manualSelection changes
+
+    const generateSeatSuggestions = () => {
+        const availableSeats = movie.seats.filter(seat => seat.availability);
+        let sortedSeats;
+        sortedSeats = findConsecutiveSeats(availableSeats, ticketsSelected);
+        setSeatSuggestions(sortedSeats);
+        setSelectedSeats(sortedSeats); //set selectedSeats initially based on suggestions
+    };
+
+    const findConsecutiveSeats = (availableSeats, tickets) => {
+        const centerRow = Math.ceil(Math.max(...availableSeats.map(seat => seat.rowNr)) / 2);
+        const centerColumn = Math.ceil(Math.max(...availableSeats.map(seat => seat.columnNr)) / 2);
+
+        //sort seats based on distance from center
+        availableSeats.sort((a, b) => {
+            const distanceA = Math.abs(a.rowNr - centerRow) + Math.abs(a.columnNr - centerColumn);
+            const distanceB = Math.abs(b.rowNr - centerRow) + Math.abs(b.columnNr - centerColumn);
+            return distanceA - distanceB;
+        });
+
+        //find consecutive seats
+        for (let i = 0; i < availableSeats.length; i++) {
+            const currentSeat = availableSeats[i];
+            const consecutiveSeats = [currentSeat];
+
+            for (let j = 1; j < tickets; j++) {
+                const nextSeat = availableSeats.find(seat => seat.rowNr === currentSeat.rowNr && seat.columnNr === currentSeat.columnNr + j);
+                if (nextSeat) {
+                    consecutiveSeats.push(nextSeat);
+                } else {
+                    break; //break if consecutive seat not found
+                }
+            }
+
+            if (consecutiveSeats.length === tickets) {
+                return consecutiveSeats;
+            }
+        }
+
+        //if consecutive seats not found, return seats closest to the center
+        return availableSeats.slice(0, tickets);
+    };
+
+    const handleSeatSelect = (row, column) => {
+        if (manualSelection) {
+            const isSelected = selectedSeats.some(seat => seat.rowNr === row && seat.columnNr === column);
+            const seatIndex = selectedSeats.findIndex(seat => seat.rowNr === row && seat.columnNr === column);
+
+            if (!isSelected) {
+                setSelectedSeats([...selectedSeats, {rowNr: row, columnNr: column}]);
+            } else {
+                const updatedSelectedSeats = [...selectedSeats];
+                updatedSelectedSeats.splice(seatIndex, 1);
+                setSelectedSeats(updatedSelectedSeats);
+            }
+        }
+    };
 
     const renderSeats = () => {
         return movie.seats.map(seat => (
             <input
                 key={`${seat.rowNr}-${seat.columnNr}`}
                 type="checkbox"
-                checked={selectedSeats.some(selectedSeat => selectedSeat.rowNr === seat.rowNr && selectedSeat.columnNr === seat.columnNr)}
+                checked={manualSelection ? selectedSeats.some(selectedSeat => selectedSeat.rowNr === seat.rowNr && selectedSeat.columnNr === seat.columnNr) : seatSuggestions.some(selectedSeat => selectedSeat.rowNr === seat.rowNr && selectedSeat.columnNr === seat.columnNr)}
                 onChange={() => handleSeatSelect(seat.rowNr, seat.columnNr)}
                 disabled={!seat.availability || seatsBooked}
             />
@@ -82,43 +112,56 @@ const MoviesBooking = ({movie, username, navigate}) => {
         }
     };
 
-    const handleTicketChange = (e) => {
-        if (!seatsBooked) {
-            const value = parseInt(e.target.value);
-            const availableSeatsCount = movie.seats.filter(seat => seat.availability).length;
-            if (!isNaN(value) && value >= 0 && value <= availableSeatsCount) {//min available seats
-                setTicketsSelected(value);
-            } else if (value > availableSeatsCount) {
-                setTicketsSelected(availableSeatsCount); //max available seats
-            }
+    const handleReturnToMovies = async () => {
+        try {
+            const moviesResponse = await axios.get(`http://localhost:8080/movies`);//refreshing the movies
+            console.log(moviesResponse);
+        } catch (error) {
+            console.error('Failed to refresh movies', error);
+        }
+        navigate('/movies');
+    };
+
+    const handleTicketsChange = (e) => {
+        const value = parseInt(e.target.value);
+        if (value > 0 && value <= movie.seats.filter(seat => seat.availability).length) {
+            setTicketsSelected(value);
         }
     };
 
-    const handleReturnToMovies = () => {
-        navigate('/movies');
+    const handleManualSelection = () => {
+        togglePressableButton();
     };
 
     return (
         <>
             {!confirmationMessage && (
                 <>
-                    <h1 className="movies-title">Vali pileti arv:</h1>
-                    <input type="number" value={ticketsSelected} onChange={handleTicketChange}/>
-                    <h1 className="movies-title">Vali istekoht:</h1>
+                    <h1 className="movies-title">Valitud film: {movie.title}</h1>
+                    {!manualSelection && <p>Vali pileti arv:</p>}
+                    {!manualSelection &&
+                        <input type="number" value={ticketsSelected} onChange={handleTicketsChange} min="1"
+                               max={movie.seats.filter(seat => seat.availability).length}/>}
+                    <p>Vali istekoht:</p>
                     <div className="custom-hr">
                         <p className="label-screen">EKRAAN</p>
                     </div>
                     <div className="movies-seats">{renderSeats()}</div>
-                    <button className="custom-button" onClick={handleConfirmSeats}>Kinnita valik</button>
-                    <br></br>
+                    <button className={`custom-button ${isButtonPressed ? 'clicked' : ''}`}
+                            onClick={handleManualSelection}>Vali kohad manuaalselt
+                    </button>
+                    <br/>
                 </>
             )}
             {confirmationMessage && <div className="confirmation-message">{confirmationMessage}</div>}
             {confirmationError && <div className="error-message">{confirmationError}</div>}
-            <button className="custom-button" onClick={handleReturnToMovies}>Tagasi filmide lehele</button>
+            <div>
+                {!confirmationMessage &&
+                    <button className="custom-button" onClick={handleConfirmSeats}>Kinnita valik</button>}
+                <button className="custom-button" onClick={handleReturnToMovies}>Tagasi filmide lehele</button>
+            </div>
         </>
     );
-
 };
 
 export default MoviesBooking;

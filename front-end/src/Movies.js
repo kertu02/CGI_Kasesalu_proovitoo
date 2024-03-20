@@ -13,14 +13,14 @@ const Movies = ({ onSelectMovie, navigate, username }) => {
     const [showPercentageColumn, setShowPercentageColumn] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [movies, setMovies] = useState(null);
-    const [isSuggestButtonPressed, setIsSuggestButtonPressed] = useState(false);
+    const [isButtonPressed, setIsButtonPressed] = useState(false);
 
     const toggleFilters = () => {
         setShowFilters(prevState => !prevState);
     };
 
-    const toggleSuggestButton = () => {
-        setIsSuggestButtonPressed(prevState => !prevState);
+    const togglePressableButton = () => {
+        setIsButtonPressed(prevState => !prevState);
     };
 
     const filterMovies = useCallback(() => {
@@ -121,28 +121,28 @@ const Movies = ({ onSelectMovie, navigate, username }) => {
     const handleGenreChange = event => {
         const { value, checked } = event.target;
         setSelectedGenres(prevGenres => checked ? [...prevGenres, value] : prevGenres.filter(genre => genre !== value));
-        setIsSuggestButtonPressed(false); // Reset suggest button state
+        setIsButtonPressed(false); // Reset suggest button state
         setShowPercentageColumn(false); // Hide percentage column
     };
 
     const handleStartTimeChange = event => {
         const { value, checked } = event.target;
         setSelectedStartTimes(prevStartTimes => checked ? [...prevStartTimes, value] : prevStartTimes.filter(startTime => startTime !== value));
-        setIsSuggestButtonPressed(false); // Reset suggest button state
+        setIsButtonPressed(false); // Reset suggest button state
         setShowPercentageColumn(false); // Hide percentage column
     };
 
     const handleAgeRatingChange = event => {
         const { value, checked } = event.target;
         setSelectedAgeRatings(prevAgeRatings => checked ? [...prevAgeRatings, value] : prevAgeRatings.filter(ageRating => ageRating !== value));
-        setIsSuggestButtonPressed(false); // Reset suggest button state
+        setIsButtonPressed(false); // Reset suggest button state
         setShowPercentageColumn(false); // Hide percentage column
     };
 
     const handleLanguageChange = event => {
         const { value, checked } = event.target;
         setSelectedLanguages(prevLanguages => checked ? [...prevLanguages, value] : prevLanguages.filter(language => language !== value));
-        setIsSuggestButtonPressed(false); // Reset suggest button state
+        setIsButtonPressed(false); // Reset suggest button state
         setShowPercentageColumn(false); // Hide percentage column
     };
 
@@ -160,25 +160,25 @@ const Movies = ({ onSelectMovie, navigate, username }) => {
             return;
         }
 
-        if (isSuggestButtonPressed) {
-            toggleSuggestButton();
+        if (isButtonPressed) {
+            togglePressableButton();
             handleRemovingFilters();
             return;
         }
 
-        // Check if there are active filters
+        //check if there are active filters
         const filtersActive = selectedGenres.length > 0 || selectedStartTimes.length > 0 || selectedAgeRatings.length > 0 || selectedLanguages.length > 0;
 
         let isCleaned = false;
-        // If there are active filters, clear them first
+        //if there are active filters, clear them first
         if (filtersActive) {
             isCleaned = true;
             handleRemovingFilters();
         }
 
-        // Calculate the suggestion mode only if there are no active filters
+        //calculate the suggestion mode only if there are no active filters
         if (!filtersActive || isCleaned) {
-            // Calculate percentage of each genre among the user's watched movies
+            //calculate percentage of each genre among the user's watched movies
             const genresCount = {};
             currentUser.watchedMovies.forEach(movie => {
                 genresCount[movie.genre] = (genresCount[movie.genre] || 0) + 1;
@@ -187,16 +187,16 @@ const Movies = ({ onSelectMovie, navigate, username }) => {
             const totalWatchedMovies = currentUser.watchedMovies.length;
             const suggestedMovies = movies.filter(movie => currentUser.watchedMovies.some(watchedMovie => watchedMovie.genre === movie.genre));
 
-            // Add percentage column to each movie
+            //add percentage column to each movie
             const moviesWithPercentage = suggestedMovies.map(movie => ({
                 ...movie,
                 percentage: ((genresCount[movie.genre] || 0) / totalWatchedMovies * 100).toFixed(0) + '%'
             }));
 
-            // Set filtered movies to suggested movies
+            //set filtered movies to suggested movies
             setFilteredMovies(moviesWithPercentage);
             setShowPercentageColumn(true);
-            setIsSuggestButtonPressed(true);
+            setIsButtonPressed(true);
         }
     }
 
@@ -207,7 +207,7 @@ const Movies = ({ onSelectMovie, navigate, username }) => {
         setSelectedLanguages([]);
         setFilteredMovies(movies);
         setShowPercentageColumn(false);
-        setIsSuggestButtonPressed(false);
+        setIsButtonPressed(false);
     }
 
     return (
@@ -311,7 +311,7 @@ const Movies = ({ onSelectMovie, navigate, username }) => {
                         </tr>
                         </tbody>
                     </table>
-                    <button className={`custom-button ${isSuggestButtonPressed ? 'clicked' : ''}`}
+                    <button className={`custom-button ${isButtonPressed ? 'clicked' : ''}`}
                             onClick={handleSuggestByMostWatchedGenre}>
                         Soovita filme vaatamisajaloo põhjal
                     </button>
