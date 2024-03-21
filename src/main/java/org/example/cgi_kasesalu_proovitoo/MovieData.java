@@ -39,10 +39,8 @@ public class MovieData implements CommandLineRunner {
         movieRepository.save(new Movie("The Willoughbys", "Komöödia", 12, LocalDateTime.parse("2024-04-01T17:00"), "ES"));
         movieRepository.save(new Movie("American Murder: The Family Next Door", "Dokumentaal", 16, LocalDateTime.parse("2024-04-01T21:00"), "EN"));
         movieRepository.save(new Movie("The Willoughbys", "Komöödia", 12, LocalDateTime.parse("2024-04-01T18:25"), "ET"));
-
-        Movie movie = movieRepository.getReferenceById(1L);
-        User user = userRepository.findByUsername("user1");
-        user.addWatchedMovie(movie);
-        userRepository.save(user);
+        movieRepository.save(new Movie("The Willoughbys", "Komöödia", 12, LocalDateTime.parse("2024-04-02T19:25"), "ET"));
+        movieRepository.save(new Movie("American Murder: The Family Next Door", "Dokumentaal", 16, LocalDateTime.parse("2024-04-02T21:00"), "EN"));
+        movieRepository.save(new Movie("American Murder: The Family Next Door", "Dokumentaal", 16, LocalDateTime.parse("2024-04-03T19:00"), "EN"));
     }
 }

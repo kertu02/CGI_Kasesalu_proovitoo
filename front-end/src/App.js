@@ -23,15 +23,6 @@ function App() {
                 const usersResponse = await axios.get(`http://localhost:8080/users`);
                 setUsers(usersResponse.data);
 
-                const storedUsername = localStorage.getItem('selectedUsername');
-                if (storedUsername) {
-                    setSelectedUsername(storedUsername);
-                }
-
-                if (storedUsername) {
-                    const userResponse = await axios.get(`http://localhost:8080/users/${storedUsername}`);
-                    setUsers(prevUsers => prevUsers.map(user => user.username === storedUsername ? userResponse.data : user));
-                }
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -45,7 +36,6 @@ function App() {
         localStorage.setItem('selectedUsername', username);
         navigate('/movies');
     }
-
 
     function handleMovieSelect(movieId) {
         const selected = movies.find(movie => movie.id === movieId);

@@ -14,8 +14,8 @@ public class User {
 
     private String username;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<Movie> watchedMovies = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<WatchedMovie> watchedMovies = new ArrayList<>();
 
     public User() {
     }
@@ -24,8 +24,15 @@ public class User {
         this.username = username;
     }
 
-    public void addWatchedMovie(Movie movie) {
-        watchedMovies.add(movie);
+    public void addWatchedMovie(Movie movie, List<Seat> selectedSeats) {
+        // Check if the movie is already in the watchedMovies list
+        boolean movieExists = watchedMovies.stream().anyMatch(watchedMovie -> watchedMovie.getMovie().getId().equals(movie.getId()));
+
+        // If the movie doesn't exist in the list, then add it
+        if (!movieExists) {
+            WatchedMovie watchedMovie = new WatchedMovie(movie, selectedSeats);
+            watchedMovies.add(watchedMovie);
+        }
     }
 
     public Long getId() {
@@ -44,11 +51,11 @@ public class User {
         this.username = username;
     }
 
-    public List<Movie> getWatchedMovies() {
+    public List<WatchedMovie> getWatchedMovies() {
         return watchedMovies;
     }
 
-    public void setWatchedMovies(List<Movie> watchedMovies) {
+    public void setWatchedMovies(List<WatchedMovie> watchedMovies) {
         this.watchedMovies = watchedMovies;
     }
 }

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 
-const MoviesBooking = ({movie, username, navigate}) => {
+const MoviesBooking = ({ movie, username, navigate }) => {
     const [ticketsSelected, setTicketsSelected] = useState(1);
     const [seatSuggestions, setSeatSuggestions] = useState([]);
     const [confirmationMessage, setConfirmationMessage] = useState('');
@@ -17,18 +17,35 @@ const MoviesBooking = ({movie, username, navigate}) => {
     };
 
     useEffect(() => {
+        const fetchSeats = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/movies/${movie.id}/seats`);
+                movie.seats = response.data; // Update movie.seats with fetched data
+                const availableSeats = movie.seats.filter(seat => seat.availability);
+                setSeatSuggestions(findConsecutiveSeats(availableSeats, ticketsSelected));
+            } catch (error) {
+                console.error('Error fetching seats:', error);
+            }
+        };
+        fetchSeats();
+    }, [movie, ticketsSelected]);
+
+
+
+
+    useEffect(() => {
+        const generateSeatSuggestions = () => {
+            const availableSeats = movie.seats.filter(seat => seat.availability);
+            let sortedSeats;
+            sortedSeats = findConsecutiveSeats(availableSeats, ticketsSelected);
+            setSeatSuggestions(sortedSeats);
+            setSelectedSeats(sortedSeats); //set selectedSeats initially based on suggestions
+        };
+
         if (!manualSelection) {
             generateSeatSuggestions();
         }
-    }, [ticketsSelected, manualSelection]); //trigger only when ticketsSelected or manualSelection changes
-
-    const generateSeatSuggestions = () => {
-        const availableSeats = movie.seats.filter(seat => seat.availability);
-        let sortedSeats;
-        sortedSeats = findConsecutiveSeats(availableSeats, ticketsSelected);
-        setSeatSuggestions(sortedSeats);
-        setSelectedSeats(sortedSeats); //set selectedSeats initially based on suggestions
-    };
+    }, [ticketsSelected, manualSelection, movie.seats]);
 
     const findConsecutiveSeats = (availableSeats, tickets) => {
         const centerRow = Math.ceil(Math.max(...availableSeats.map(seat => seat.rowNr)) / 2);
@@ -86,7 +103,7 @@ const MoviesBooking = ({movie, username, navigate}) => {
                 type="checkbox"
                 checked={manualSelection ? selectedSeats.some(selectedSeat => selectedSeat.rowNr === seat.rowNr && selectedSeat.columnNr === seat.columnNr) : seatSuggestions.some(selectedSeat => selectedSeat.rowNr === seat.rowNr && selectedSeat.columnNr === seat.columnNr)}
                 onChange={() => handleSeatSelect(seat.rowNr, seat.columnNr)}
-                disabled={!seat.availability || seatsBooked}
+                disabled={!seat.availability || (seatsBooked && !selectedSeats.some(selectedSeat => selectedSeat.rowNr === seat.rowNr && selectedSeat.columnNr === seat.columnNr))}
             />
         ));
     };
@@ -94,11 +111,12 @@ const MoviesBooking = ({movie, username, navigate}) => {
     const handleConfirmSeats = async () => {
         if (!seatsBooked) {
             try {
-                const response = await axios.put(`http://localhost:8080/movies/${movie.id}/seats`, selectedSeats);
+                const response = await axios.put(`http://localhost:8080/movies/${movie.id}/seats`, selectedSeats.map(seat => ({ rowNr: seat.rowNr, columnNr: seat.columnNr })));
 
                 if (response.status === 200) {
-                    await axios.put(`http://localhost:8080/users/${username}/watched-movies`, movie);
+                    await axios.put(`http://localhost:8080/users/${username}/watchedMovies/${movie.id}`, selectedSeats.map(seat => ({ rowNr: seat.rowNr, columnNr: seat.columnNr }))); // Send only the movie ID
                     setConfirmationMessage('Valitud kohad kinnitatud! Palun pöördu tagasi filmide lehele.');
+                    console.log(response);
                     setConfirmationError('');
                     setSeatsBooked(true);
                 } else {
@@ -113,12 +131,6 @@ const MoviesBooking = ({movie, username, navigate}) => {
     };
 
     const handleReturnToMovies = async () => {
-        try {
-            const moviesResponse = await axios.get(`http://localhost:8080/movies`);//refreshing the movies
-            console.log(moviesResponse);
-        } catch (error) {
-            console.error('Failed to refresh movies', error);
-        }
         navigate('/movies');
     };
 

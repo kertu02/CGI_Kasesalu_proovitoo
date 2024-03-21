@@ -3,7 +3,8 @@ import axios from 'axios';
 import './UserPage.css';
 
 const UserPage = ({ username, navigate }) => {
-    const [currentUser, setCurrentUser] = useState(null);
+    const [currentUser, setCurrentUser] = useState(username);
+    const [watchedMovies, setWatchedMovies] = useState([]);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -15,7 +16,17 @@ const UserPage = ({ username, navigate }) => {
             }
         };
 
+        const fetchWatchedMovies = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/users/${username}/watchedMovies`);
+                setWatchedMovies(response.data);
+            } catch (error) {
+                console.error('Error fetching watched movies:', error);
+            }
+        };
+
         fetchUserData();
+        fetchWatchedMovies();
     }, [username]);
 
     if (!currentUser) {
@@ -43,7 +54,7 @@ const UserPage = ({ username, navigate }) => {
             <h1 className="profile-username">{currentUser.username}</h1>
             <div className="profile-container">
                 <h3 className="movies-heading">Vaadatud filmid:</h3>
-                {currentUser.watchedMovies.length === 0 ? (
+                {watchedMovies.length === 0 ? (
                     <p className="no-movies-message">Te pole veel ühtegi filmi vaadanud.</p>
                 ) : (
                     <table className="movies-table">
@@ -53,20 +64,30 @@ const UserPage = ({ username, navigate }) => {
                             <th className="custom-th">Žanr</th>
                             <th className="custom-th">Keel</th>
                             <th className="custom-th">Algusaeg</th>
+                            <th className="custom-th">Istekohad</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {currentUser.watchedMovies.map((movie, index) => (
+                        {watchedMovies.map((watchedMovie, index) => (
                             <tr key={index}>
-                                <td>{movie.title}</td>
-                                <td>{movie.genre}</td>
-                                <td>{movie.language}</td>
-                                <td>{formatStartTime(movie.startTime)}</td>
+                                <td>{watchedMovie.movie.title}</td>
+                                <td>{watchedMovie.movie.genre}</td>
+                                <td>{watchedMovie.movie.language}</td>
+                                <td>{formatStartTime(watchedMovie.movie.startTime)}</td>
+                                <td>
+                                    {watchedMovie.selectedSeats.map((seat, seatIndex) => (
+                                        <div key={seatIndex}>
+                                            Rida {seat.rowNr}, Veerg {seat.columnNr}
+                                        </div>
+                                    ))}
+                                </td>
+
                             </tr>
                         ))}
                         </tbody>
                     </table>
                 )}
+
             </div>
             <button className="custom-button" onClick={handleReturnToMovies}>Tagasi filmide lehele</button>
         </div>
