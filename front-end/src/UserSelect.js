@@ -1,4 +1,3 @@
-// UserSelect.js
 import React from 'react';
 
 const UserSelect = ({ users, handleUsernameSelect }) => (

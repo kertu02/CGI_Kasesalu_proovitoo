@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import axios from 'axios';
 import {Link} from "react-router-dom";
-import './Movies.css';
 
 const Movies = ({onSelectMovie, navigate, username}) => {
     const [selectedGenres, setSelectedGenres] = useState([]);
@@ -208,9 +207,11 @@ const Movies = ({onSelectMovie, navigate, username}) => {
     return (
         <div>
             <h1 className="movies-title">KINOKAVA</h1>
-            <button className="custom-button" onClick={handleNavigateToUserPage}>Minu profiil</button>
+            <div className="top-container">
+                <button className="custom-button" onClick={handleNavigateToUserPage}>Minu profiil</button>
+                <button className="custom-button" onClick={handleNavigateToHome}>Vaheta kasutajat</button>
+            </div>
             <button className="custom-button" onClick={toggleFilters}>Filtrid</button>
-            <button className="custom-button" onClick={handleNavigateToHome}>Vaheta kasutajat</button>
             {showFilters && (
                 <div className="filter-modal">
                     <table className="filter-table">

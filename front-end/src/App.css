@@ -1,53 +1,403 @@
-/* App.css */
-.App {
-  text-align: center;
-  background-color: #3F2E3E;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 40px;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: #EFE1D1;
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.App {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    font-size: calc(10px + 2vmin);
+    background-color: #3F2E3E;
+    text-align: center;
+}
+
 
 .App-header {
-  width: 100%; /* Ensure the header spans the entire width */
-  background-color: rgba(52, 7, 7, 0.29);
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    background-color: #331D2C;
+    color: #EFE1D1;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
+
+.modeButton {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 999;
+    background-color: #A78295;
+    color: #331D2C;
+    border: none;
+    padding: 10px 10px;
+    margin-right: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.top-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+}
+
 
 .custom-button {
-  background-color: #331D2C;
-  color: #A78295;
-  border: none;
-  padding: 10px 20px;
-  margin-right: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  font-size: 16px;
-  text-transform: uppercase;
+    background-color: #A78295;
+    color: #331D2C;
+    border: none;
+    padding: 15px 30px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
 }
 
-.custom-button:hover {
-  background-color: #A78295;
-  color: #331D2C;
-  transform: scale(1.05);
+.custom-button:hover, .modeButton:hover {
+    background-color: #EFE1D1;
+    color: #331D2C;
+    transform: scale(1.05);
 }
 
-.error-message, .confirmation-message {
-  padding-bottom: 20px;
+.movies-title {
+    color: #EFE1D1;
+    font-size: 35px;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+.day-header {
+    color: #EFE1D1;
+    font-size: 24px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.movies-container {
+    background-color: #331D2C;
+    color: #EFE1D1;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.movies-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+}
+
+.movies-table th, .movies-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #3F2E3E;
+}
+
+.movies-table tbody tr:nth-child(even) {
+    background-color: rgba(63, 46, 62, 0.41);
+}
+
+.movies-table tbody tr:hover {
+    background-color: rgba(167, 130, 149, 0.25);
+}
+
+.movies-table td {
+    font-size: 16px;
+}
+
+.filter-modal {
+    background-color: #3F2E3E;
+    color: #EFE1D1;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+    width: auto;
+}
+
+.filter-modal td > label {
+    font-weight: bold;
+}
+
+.filter-modal label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-align: left;
+}
+
+.filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+}
+
+.filter-modal input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.filter-modal input[type="checkbox"] {
+    display: none;
+}
+
+.filter-modal input[type="checkbox"] + label {
+    position: relative;
+    padding-left: 25px;
+    cursor: pointer;
+}
+
+.filter-modal input[type="checkbox"] + label:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    border: 2px solid #EFE1D1;
+    border-radius: 3px;
+}
+
+.filter-modal input[type="checkbox"]:checked + label:before {
+    background-color: #A78295;
+}
+
+.filter-modal input[type="checkbox"] + label:after {
+    content: '\2713';
+    position: absolute;
+    top: 1px;
+    left: 4px;
+    font-size: 14px;
+    color: #EFE1D1;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.filter-modal input[type="checkbox"]:checked + label:after {
+    opacity: 1;
+}
+
+.link-style {
+    text-decoration: none;
+    color: #EFE1D1;
+}
+
+.unavailable-seat {
+    opacity: 0.5;
+}
+
+.movies-seats {
+    border-radius: 20px;
+    padding: 27px 7px 27px 30px;
+    display: grid;
+    grid-template-columns: repeat(10, 40px);
+    gap: 5px;
+    background-color: rgba(167, 130, 149, 0.39);
+    margin-bottom: 20px;
+}
+
+.movie-seat {
+    width: 40px;
+    height: 40px;
+    background-color: #A78295;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.movie-seat.available {
+    background-color: #EFE1D1;
+}
+
+input[type="number"] {
+    width: 60px;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #331D2C;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #EFE1D1;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #331D2C;
+}
+
+p {
+    color: #EFE1D1;
+}
+
+h1 {
+    color: #EFE1D1;
+}
+
+.custom-hr {
+    position: relative;
+    width: 350px;
+    height: 20px;
+    margin: 10px auto;
+    background-color: #A78295;
+    border-radius: 15px;
+}
+
+.label-screen {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #331D2C;
+    padding: 0 10px;
+    font-size: 10px;
 }
 
 .clicked {
-  background-color: #EFE1D1;
-  color: #331D2C;
+    background-color: #EFE1D1;
+    color: #331D2C;
 }
 
 .custom-button.clicked:hover {
-  background-color: #EFE1D1;
+    background-color: #EFE1D1;
+}
+
+/* light mode */
+.light {
+    background-color: #F7F7F7;
+    color: #333;
+
+    .modeButton {
+        background-color: #707070;
+        color: #F7F7F7;
+    }
+
+    .App-header {
+        color: #333333;
+        background-color: #EAEAEA;
+        padding: 20px;
+    }
+
+    .custom-button {
+        background-color: #707070;
+        color: #F7F7F7;
+    }
+
+    .custom-button:hover, .modeButton:hover {
+        background-color: #A78295;
+        color: #333;
+        transform: scale(1.05);
+    }
+
+    .movies-title { color: #333; }
+
+    .day-header {
+        color: #333;
+    }
+
+    .movies-container {
+        background-color: #EAEAEA;
+        color: #333;
+    }
+
+    .movies-table tbody tr:nth-child(even) {
+        background-color: rgba(199, 197, 197, 0.53);
+    }
+
+    .movies-table tbody tr:hover {
+        background-color: rgba(190, 189, 189, 0.53);
+    }
+
+    .movies-table th {
+        background-color: #EAEAEA;
+    }
+
+    .filter-modal {
+        background-color: #EAEAEA;
+        color: #333;
+    }
+
+    .filter-modal input[type="checkbox"]:checked + label:before {
+        background-color: #707070;
+    }
+
+    .filter-modal input[type="checkbox"] + label:before {
+        border: 2px solid #333;
+    }
+
+    p {
+        color: #333;
+    }
+
+    h1 {
+        color: #333;
+    }
+
+    .link-style {
+        color: #333;
+    }
+
+    input[type="number"] {
+        width: 60px;
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #707070;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        background-color: #EAEAEA;
+    }
+
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #707070;
+    }
+
+    .custom-hr {
+        position: relative;
+        width: 350px;
+        height: 20px;
+        margin: 10px auto;
+        background-color: #A78295;
+        border-radius: 15px;
+    }
+
+    .label-screen {
+        color: #EAEAEA;
+    }
+
+    .clicked {
+        background-color: #EAEAEA;
+        color: #331D2C;
+    }
+
+    .custom-button.clicked:hover {
+        background-color: #EAEAEA;
+    }
+
 }

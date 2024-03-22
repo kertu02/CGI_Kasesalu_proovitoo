@@ -165,8 +165,8 @@ const MoviesBooking = ({ movie, username, navigate }) => {
                     <br/>
                 </>
             )}
-            {confirmationMessage && <div className="confirmation-message">{confirmationMessage}</div>}
-            {confirmationError && <div className="error-message">{confirmationError}</div>}
+            {confirmationMessage && <p>{confirmationMessage}</p>}
+            {confirmationError && <p>">{confirmationError}</p>}
             <div>
                 {!confirmationMessage &&
                     <button className="custom-button" onClick={handleConfirmSeats}>Kinnita valik</button>}

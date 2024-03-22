@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './UserPage.css';
 
 const UserPage = ({ username, navigate }) => {
     const [currentUser, setCurrentUser] = useState(username);
@@ -52,10 +51,10 @@ const UserPage = ({ username, navigate }) => {
     return (
         <div className="user-profile">
             <h1 className="profile-username">{currentUser.username}</h1>
-            <div className="profile-container">
-                <h3 className="movies-heading">Vaadatud filmid:</h3>
+            <div className="movies-container">
+                <p>Vaadatud filmid:</p>
                 {watchedMovies.length === 0 ? (
-                    <p className="no-movies-message">Te pole veel ühtegi filmi vaadanud.</p>
+                    <p>Te pole veel ühtegi filmi vaadanud.</p>
                 ) : (
                     <table className="movies-table">
                         <thead>
