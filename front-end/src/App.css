@@ -18,7 +18,7 @@ code {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px;
+    padding: 50px;
     font-size: calc(10px + 2vmin);
     background-color: #3F2E3E;
     text-align: center;
@@ -58,7 +58,6 @@ code {
     right: 20px;
     z-index: 999;
 }
-
 
 .custom-button {
     background-color: #A78295;
@@ -392,7 +391,7 @@ h1 {
     }
 
     .clicked {
-        background-color: #EAEAEA;
+        background-color: #A78295;
         color: #331D2C;
     }
 

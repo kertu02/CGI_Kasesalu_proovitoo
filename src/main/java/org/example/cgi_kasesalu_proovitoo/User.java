@@ -26,10 +26,16 @@ public class User {
 
     public void addWatchedMovie(Movie movie, List<Seat> selectedSeats) {
         // Check if the movie is already in the watchedMovies list
-        boolean movieExists = watchedMovies.stream().anyMatch(watchedMovie -> watchedMovie.getMovie().getId().equals(movie.getId()));
+        WatchedMovie existingWatchedMovie = watchedMovies.stream()
+                .filter(watchedMovie -> watchedMovie.getMovie().getId().equals(movie.getId()))
+                .findFirst()
+                .orElse(null);
 
-        // If the movie doesn't exist in the list, then add it
-        if (!movieExists) {
+        // If the movie exists, update the selected seats
+        if (existingWatchedMovie != null) {
+            existingWatchedMovie.setSelectedSeats(selectedSeats);
+        } else {
+            // If the movie doesn't exist in the list, then add it
             WatchedMovie watchedMovie = new WatchedMovie(movie, selectedSeats);
             watchedMovies.add(watchedMovie);
         }

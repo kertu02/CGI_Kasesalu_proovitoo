@@ -1,10 +1,14 @@
+// user profile, where they can see their watched movies and seats
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const UserPage = ({ username, navigate }) => {
-    const [currentUser, setCurrentUser] = useState(username);
-    const [watchedMovies, setWatchedMovies] = useState([]);
+    // defining state variables using useState hook
+    const [currentUser, setCurrentUser] = useState(username); // state for current user
+    const [watchedMovies, setWatchedMovies] = useState([]); // state for watched movies
 
+    // effect hook to fetch user data and watched movies
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -28,10 +32,12 @@ const UserPage = ({ username, navigate }) => {
         fetchWatchedMovies();
     }, [username]);
 
+    // check if user is not found - if you refresh the page and it goes null
     if (!currentUser) {
         return <div className="user-not-found">User not found</div>;
     }
 
+    // function to format start time
     const formatStartTime = startTime => {
         const date = new Date(startTime);
         const day = padZero(date.getDate());
@@ -42,6 +48,7 @@ const UserPage = ({ username, navigate }) => {
         return `${hours}:${minutes} ${day}.${month}.${year}`;
     };
 
+    // function to pad zero
     const padZero = num => (num < 10 ? "0" + num : num);
 
     function handleReturnToMovies() {

@@ -1,21 +1,25 @@
+// functional component for booking movies
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 
 const MoviesBooking = ({ movie, username, navigate }) => {
-    const [ticketsSelected, setTicketsSelected] = useState(1);
-    const [seatSuggestions, setSeatSuggestions] = useState([]);
-    const [confirmationMessage, setConfirmationMessage] = useState('');
-    const [confirmationError, setConfirmationError] = useState('');
-    const [seatsBooked, setSeatsBooked] = useState(false);
-    const [selectedSeats, setSelectedSeats] = useState([]);
-    const [isButtonPressed, setIsButtonPressed] = useState(false);
-    const [manualSelection, setManualSelection] = useState(false);
+    // defining state variables using useState hook
+    const [ticketsSelected, setTicketsSelected] = useState(1); // state for selected tickets
+    const [seatSuggestions, setSeatSuggestions] = useState([]); // state for suggested seats
+    const [confirmationMessage, setConfirmationMessage] = useState(''); // state for confirmation message
+    const [confirmationError, setConfirmationError] = useState(''); // state for confirmation error
+    const [seatsBooked, setSeatsBooked] = useState(false); // state for booked seats
+    const [selectedSeats, setSelectedSeats] = useState([]); // state for selected seats
+    const [isButtonPressed, setIsButtonPressed] = useState(false); // state for button press
+    const [manualSelection, setManualSelection] = useState(false); // state for manual selection
 
+    // function to toggle state of button press
     const togglePressableButton = () => {
         setManualSelection(prevState => !prevState);
         setIsButtonPressed(prevState => !prevState);
     };
 
+    // effect hook to fetch available seats based on selected movie and tickets
     useEffect(() => {
         const fetchSeats = async () => {
             try {
@@ -30,16 +34,14 @@ const MoviesBooking = ({ movie, username, navigate }) => {
         fetchSeats();
     }, [movie, ticketsSelected]);
 
-
-
-
+    // effect hook to generate seat suggestions based on manual selection
     useEffect(() => {
         const generateSeatSuggestions = () => {
             const availableSeats = movie.seats.filter(seat => seat.availability);
             let sortedSeats;
             sortedSeats = findConsecutiveSeats(availableSeats, ticketsSelected);
             setSeatSuggestions(sortedSeats);
-            setSelectedSeats(sortedSeats); //set selectedSeats initially based on suggestions
+            setSelectedSeats(sortedSeats); // set selectedSeats initially based on suggestions
         };
 
         if (!manualSelection) {
@@ -47,18 +49,19 @@ const MoviesBooking = ({ movie, username, navigate }) => {
         }
     }, [ticketsSelected, manualSelection, movie.seats]);
 
+    // function to find consecutive available seats
     const findConsecutiveSeats = (availableSeats, tickets) => {
         const centerRow = Math.ceil(Math.max(...availableSeats.map(seat => seat.rowNr)) / 2);
         const centerColumn = Math.ceil(Math.max(...availableSeats.map(seat => seat.columnNr)) / 2);
 
-        //sort seats based on distance from center
+        // sort seats based on distance from center
         availableSeats.sort((a, b) => {
             const distanceA = Math.abs(a.rowNr - centerRow) + Math.abs(a.columnNr - centerColumn);
             const distanceB = Math.abs(b.rowNr - centerRow) + Math.abs(b.columnNr - centerColumn);
             return distanceA - distanceB;
         });
 
-        //find consecutive seats
+        // find consecutive seats
         for (let i = 0; i < availableSeats.length; i++) {
             const currentSeat = availableSeats[i];
             const consecutiveSeats = [currentSeat];
@@ -68,7 +71,7 @@ const MoviesBooking = ({ movie, username, navigate }) => {
                 if (nextSeat) {
                     consecutiveSeats.push(nextSeat);
                 } else {
-                    break; //break if consecutive seat not found
+                    break; // break if consecutive seat not found
                 }
             }
 
@@ -77,10 +80,11 @@ const MoviesBooking = ({ movie, username, navigate }) => {
             }
         }
 
-        //if consecutive seats not found, return seats closest to the center
+        // if consecutive seats not found, return seats closest to the center
         return availableSeats.slice(0, tickets);
     };
 
+    // function to handle seat selection
     const handleSeatSelect = (row, column) => {
         if (manualSelection) {
             const isSelected = selectedSeats.some(seat => seat.rowNr === row && seat.columnNr === column);
@@ -96,6 +100,7 @@ const MoviesBooking = ({ movie, username, navigate }) => {
         }
     };
 
+    // function to render seats
     const renderSeats = () => {
         return movie.seats.map(seat => (
             <input
@@ -108,13 +113,14 @@ const MoviesBooking = ({ movie, username, navigate }) => {
         ));
     };
 
+    // function to handle seat confirmation
     const handleConfirmSeats = async () => {
         if (!seatsBooked) {
             try {
                 const response = await axios.put(`http://localhost:8080/movies/${movie.id}/seats`, selectedSeats.map(seat => ({ rowNr: seat.rowNr, columnNr: seat.columnNr })));
 
                 if (response.status === 200) {
-                    await axios.put(`http://localhost:8080/users/${username}/watchedMovies/${movie.id}`, selectedSeats.map(seat => ({ rowNr: seat.rowNr, columnNr: seat.columnNr }))); // Send only the movie ID
+                    await axios.put(`http://localhost:8080/users/${username}/watchedMovies/${movie.id}`, selectedSeats.map(seat => ({ rowNr: seat.rowNr, columnNr: seat.columnNr })));
                     setConfirmationMessage('Valitud kohad kinnitatud! Palun pöördu tagasi filmide lehele.');
                     console.log(response);
                     setConfirmationError('');
@@ -130,10 +136,12 @@ const MoviesBooking = ({ movie, username, navigate }) => {
         }
     };
 
+    // function to handle return to movies page
     const handleReturnToMovies = async () => {
         navigate('/movies');
     };
 
+    // function to handle tickets change
     const handleTicketsChange = (e) => {
         const value = parseInt(e.target.value);
         if (value > 0 && value <= movie.seats.filter(seat => seat.availability).length) {
@@ -141,6 +149,7 @@ const MoviesBooking = ({ movie, username, navigate }) => {
         }
     };
 
+    // function to handle manual seat selection
     const handleManualSelection = () => {
         togglePressableButton();
     };
@@ -166,7 +175,7 @@ const MoviesBooking = ({ movie, username, navigate }) => {
                 </>
             )}
             {confirmationMessage && <p>{confirmationMessage}</p>}
-            {confirmationError && <p>">{confirmationError}</p>}
+            {confirmationError && <p>{confirmationError}</p>}
             <div>
                 {!confirmationMessage &&
                     <button className="custom-button" onClick={handleConfirmSeats}>Kinnita valik</button>}

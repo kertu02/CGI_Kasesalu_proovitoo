@@ -1,32 +1,40 @@
-import React, {useCallback, useEffect, useState} from 'react';
+// this component represents the Movies view in the application
+// it displays a list of movies based on various filters and user preferences
+
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
-const Movies = ({onSelectMovie, navigate, username}) => {
-    const [selectedGenres, setSelectedGenres] = useState([]);
-    const [selectedStartTimes, setSelectedStartTimes] = useState([]);
-    const [selectedAgeRatings, setSelectedAgeRatings] = useState([]);
-    const [selectedLanguages, setSelectedLanguages] = useState([]);
-    const [showFilters, setShowFilters] = useState(false);
-    const [filteredMovies, setFilteredMovies] = useState([]);
-    const [showPercentageColumn, setShowPercentageColumn] = useState(false);
-    const [currentUser, setCurrentUser] = useState(null);
-    const [movies, setMovies] = useState(null);
-    const [isButtonPressed, setIsButtonPressed] = useState(false);
+const Movies = ({ onSelectMovie, navigate, username }) => {
+    // defining state variables using useState hook
+    const [movies, setMovies] = useState(null); // array of all movies
+    const [filteredMovies, setFilteredMovies] = useState([]); // array of filtered movies
+    const [currentUser, setCurrentUser] = useState(null); // current user information
+    const [selectedGenres, setSelectedGenres] = useState([]); // array of selected genres
+    const [selectedStartTimes, setSelectedStartTimes] = useState([]); // array of selected start times
+    const [selectedAgeRatings, setSelectedAgeRatings] = useState([]); // array of selected age ratings
+    const [selectedLanguages, setSelectedLanguages] = useState([]); // array of selected languages
+    const [showFilters, setShowFilters] = useState(false); // boolean to toggle visibility of filters
+    const [showPercentageColumn, setShowPercentageColumn] = useState(false); // boolean to toggle visibility of percentage column
+    const [isButtonPressed, setIsButtonPressed] = useState(false); // boolean to track if suggest button is pressed
 
+    // function to toggle visibility of filters
     const toggleFilters = () => {
         setShowFilters(prevState => !prevState);
     };
 
+    // function to toggle state of button press
     const togglePressableButton = () => {
         setIsButtonPressed(prevState => !prevState);
     };
 
+    // function to filter movies based on selected filters
     const filterMovies = useCallback(() => {
-        if (!movies) return; // Return if movies are not loaded yet
+        if (!movies) return; // return if movies are not loaded yet
 
-        let filtered = [...movies]; // Make a copy of movies array to work with
+        let filtered = [...movies]; // make a copy of movies array to work with
 
+        // filter movies based on selected genres, start times, age ratings, and languages
         if (selectedGenres.length > 0)
             filtered = filtered.filter(movie => selectedGenres.includes(movie.genre));
         if (selectedStartTimes.length > 0)
@@ -36,9 +44,10 @@ const Movies = ({onSelectMovie, navigate, username}) => {
         if (selectedLanguages.length > 0)
             filtered = filtered.filter(movie => selectedLanguages.includes(movie.language));
 
-        setFilteredMovies(filtered);
+        setFilteredMovies(filtered); // update filtered movies state
     }, [movies, selectedGenres, selectedStartTimes, selectedAgeRatings, selectedLanguages]);
 
+    // effect to fetch user data and movies data on component mount
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -62,45 +71,31 @@ const Movies = ({onSelectMovie, navigate, username}) => {
         fetchUserData();
     }, [username]);
 
+    // effect to filter movies when filters or movies change
     useEffect(() => {
         filterMovies();
     }, [filterMovies]);
 
+    // effect to filter movies when filters or movies change
     useEffect(() => {
-        // When movies or filters change, re-filter movies
         filterMovies();
     }, [movies, filterMovies]);
 
+    // function to generate days with movies
+    const generateDaysWithMovies = () => {
+        const daysWithMovies = [];
+        const movieDates = filteredMovies.map(movie => formatDate(new Date(movie.startTime)));
+        const uniqueDates = [...new Set(movieDates)]; // get unique dates
 
-    const generateDaysOfWeek = () => {
-        if (filteredMovies.length === 0) return [];
+        uniqueDates.forEach(date => {
+            const dayMovies = filteredMovies.filter(movie => formatDate(new Date(movie.startTime)) === date);
+            daysWithMovies.push({ date, movies: dayMovies });
+        });
 
-        const daysOfWeek = [];
-
-        //find the earliest start time from the filtered movie data
-        const earliestStartTime = new Date(Math.min(...filteredMovies.map(movie => new Date(movie.startTime).getTime())));
-        const today = new Date(earliestStartTime); //get the earliest start time
-
-        for (let i = 0; i < 4; i++) {
-            const date = new Date(today);
-            date.setDate(date.getDate() + i);
-            const formattedDate = formatDate(date);
-            const label = formattedDate.split(', ')[0]; //extract the weekday
-            const dayDate = formattedDate.substring(formattedDate.indexOf(',') + 2); //extract the day and month
-
-            //find movies for this day from filteredMovies
-            const dayMovies = filteredMovies.filter(movie => {
-                const movieDate = formatDate(new Date(movie.startTime));
-                return movieDate === formattedDate;
-            });
-
-            //only add the day if there are movies for that day
-            if (dayMovies.length > 0)
-                daysOfWeek.push({label, date: dayDate, movies: dayMovies});
-        }
-        return daysOfWeek;
+        return daysWithMovies;
     };
 
+    // function to format start time
     const formatStartTime = startTime => {
         const date = new Date(startTime);
         const hours = date.getHours();
@@ -108,51 +103,60 @@ const Movies = ({onSelectMovie, navigate, username}) => {
         return `${padZero(hours)}:${padZero(minutes)}`;
     };
 
+    // function to pad zero to single digit numbers
     const padZero = num => {
         return num < 10 ? '0' + num : num;
     };
 
+    // function to format date
     const formatDate = date => {
-        const options = {weekday: 'long', day: '2-digit', month: '2-digit'};
+        const options = { weekday: 'long', day: '2-digit', month: '2-digit' };
         return date.toLocaleDateString('et-EE', options);
     };
 
+    // event handler for genre change
     const handleGenreChange = event => {
-        const {value, checked} = event.target;
+        const { value, checked } = event.target;
         setSelectedGenres(prevGenres => checked ? [...prevGenres, value] : prevGenres.filter(genre => genre !== value));
-        setIsButtonPressed(false); // Reset suggest button state
-        setShowPercentageColumn(false); // Hide percentage column
+        setIsButtonPressed(false);
+        setShowPercentageColumn(false);
     };
 
+    // event handler for start time change
     const handleStartTimeChange = event => {
-        const {value, checked} = event.target;
+        const { value, checked } = event.target;
         setSelectedStartTimes(prevStartTimes => checked ? [...prevStartTimes, value] : prevStartTimes.filter(startTime => startTime !== value));
-        setIsButtonPressed(false); // Reset suggest button state
-        setShowPercentageColumn(false); // Hide percentage column
+        setIsButtonPressed(false);
+        setShowPercentageColumn(false);
     };
 
+    // event handler for age rating change
     const handleAgeRatingChange = event => {
-        const {value, checked} = event.target;
+        const { value, checked } = event.target;
         setSelectedAgeRatings(prevAgeRatings => checked ? [...prevAgeRatings, value] : prevAgeRatings.filter(ageRating => ageRating !== value));
-        setIsButtonPressed(false); // Reset suggest button state
-        setShowPercentageColumn(false); // Hide percentage column
+        setIsButtonPressed(false);
+        setShowPercentageColumn(false);
     };
 
+    // event handler for language change
     const handleLanguageChange = event => {
-        const {value, checked} = event.target;
+        const { value, checked } = event.target;
         setSelectedLanguages(prevLanguages => checked ? [...prevLanguages, value] : prevLanguages.filter(language => language !== value));
-        setIsButtonPressed(false); // Reset suggest button state
-        setShowPercentageColumn(false); // Hide percentage column
+        setIsButtonPressed(false);
+        setShowPercentageColumn(false);
     };
 
+    // function to navigate to user page
     function handleNavigateToUserPage() {
         navigate(`/users/${currentUser.username}`);
     }
 
+    // function to navigate to home page
     function handleNavigateToHome() {
         navigate('');
     }
 
+    // function to show suggested movies
     async function handleSuggestByMostWatchedGenre() {
         try {
             const response = await axios.get(`http://localhost:8080/users/${username}/watchedMovies`);
@@ -169,7 +173,7 @@ const Movies = ({onSelectMovie, navigate, username}) => {
                 return;
             }
 
-            //calculate the most watched genre
+            // calculate the most watched genre
             const genresCount = {};
             watchedMovies.forEach(watchedMovie => {
                 genresCount[watchedMovie.movie.genre] = (genresCount[watchedMovie.movie.genre] || 0) + 1;
@@ -177,7 +181,7 @@ const Movies = ({onSelectMovie, navigate, username}) => {
 
             const mostWatchedGenre = Object.keys(genresCount).reduce((a, b) => genresCount[a] > genresCount[b] ? a : b);
 
-            //filter movies by the most watched genre and add percentage column
+            // filter movies by the most watched genre and add percentage column
             const suggestedMovies = movies
                 .filter(movie => movie.genre === mostWatchedGenre)
                 .map(movie => ({
@@ -193,7 +197,7 @@ const Movies = ({onSelectMovie, navigate, username}) => {
         }
     }
 
-
+    // function to handle removing filters
     function handleRemovingFilters() {
         setSelectedGenres([]);
         setSelectedStartTimes([]);
@@ -204,6 +208,7 @@ const Movies = ({onSelectMovie, navigate, username}) => {
         setIsButtonPressed(false);
     }
 
+    // component rendering movies and filter options
     return (
         <div>
             <h1 className="movies-title">KINOKAVA</h1>
@@ -212,6 +217,7 @@ const Movies = ({onSelectMovie, navigate, username}) => {
                 <button className="custom-button" onClick={handleNavigateToHome}>Vaheta kasutajat</button>
             </div>
             <button className="custom-button" onClick={toggleFilters}>Filtrid</button>
+            {/* Filter options modal */}
             {showFilters && (
                 <div className="filter-modal">
                     <table className="filter-table">
@@ -320,9 +326,10 @@ const Movies = ({onSelectMovie, navigate, username}) => {
                     <button className="custom-button" onClick={handleRemovingFilters}>Eemalda filtrid</button>
                 </div>
             )}
-            {generateDaysOfWeek().map((day, index) => (
+            {/* render movies for each day */}
+            {generateDaysWithMovies().map((day, index) => (
                 <div key={index} className="day-container">
-                    <h2 className="day-header">{day.label}, {day.date}</h2>
+                    <h2 className="day-header">{day.date}</h2>
                     <div className="movies-container">
                         <table className="movies-table">
                             <thead>
@@ -332,6 +339,7 @@ const Movies = ({onSelectMovie, navigate, username}) => {
                                 <th>Vanusepiirang</th>
                                 <th>Algus</th>
                                 <th>Keel</th>
+                                {/* show percentage column if enabled */}
                                 {showPercentageColumn && <th>Sobivuse %</th>}
                             </tr>
                             </thead>
@@ -339,6 +347,7 @@ const Movies = ({onSelectMovie, navigate, username}) => {
                             {day.movies.map(movie => (
                                 <tr key={movie.id}>
                                     <td>
+                                        {/* link to movie booking page */}
                                         <Link to={`/movie/${movie.id}`} className="link-style"
                                               onClick={() => onSelectMovie(movie.id)}>{movie.title}</Link>
                                     </td>
